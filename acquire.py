@@ -36,13 +36,15 @@ def make_full_link(link_url):
         link_url = URL + link_url
     return link_url
 
-def archive_list(main_soup):
+def archive_list(main_url):
     '''
     Gets a list of each archive page from the main site
     '''
     session = get_session()
 
-    right_fonts = main_soup.find_all('font', color='#666666', size='2', face='Arial')
+    soup = BeautifulSoup(session.get(URL).content)
+    
+    right_fonts = soup.find_all('font', color='#666666', size='2', face='Arial')
 
     links = []
 
@@ -61,3 +63,10 @@ def archive_list(main_soup):
     archives = archives.apply(make_full_link)
 
     return archives
+
+def scrape_page(archive_url):
+    session = get_session()
+
+    soup = BeautifulSoup(session.get(URL).content)
+
+    soup.find('table', width='540', border='0', align='center', cellpadding='0', cellspacing='0')
