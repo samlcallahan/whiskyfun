@@ -52,7 +52,7 @@ def archive_list(main_url):
         if html_blob.find('a'):
             links.append(html_blob.find('a')['href'])
 
-    archives = []
+    archives = [URL]
 
     for link in links:
         if "archive" in link.lower() or 'feisile' in link.lower() or link.lower() == 'special.html':
@@ -69,4 +69,36 @@ def scrape_page(archive_url):
 
     soup = BeautifulSoup(session.get(URL).content)
 
-    soup.find('table', width='540', border='0', align='center', cellpadding='0', cellspacing='0')
+    title_soups = soup.find_all('span', class_='textegrandfoncegras')
+
+    titles = [title.text for title in title_soups if '(' in title.text]
+
+    angus_sections = soup.find_all('table', width='498')
+
+    angus_titles = []
+    
+    for section in angus_sections:
+        angus_soups = section.find_all('span', class_='textegrandfoncegras')
+        angus_titles.extend([title.text for title in angus_soups if '(' in title.text])
+
+    authors = []
+
+    for title in titles:
+        if title in angus_titles:
+            authors.append('Angus')
+        else:
+            authors.append('Serge')
+
+    rating_soups = soup.find_all('span', class_='textenormalgras')
+
+    ratings = [rating.text.strip() for rating in rating_soups if ' points.' in rating.text]
+
+    content_soups = soup.find_all('span', class_='TextenormalNEW')
+
+    contents = [content.text for content in content_soups if 'Colour' in content.text]
+
+    date_soups = soup.find_all('font', color='#660000', size='3')
+
+    dates = [date_soup.text for date_soup in date_soups]
+
+    return 
