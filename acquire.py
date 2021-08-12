@@ -52,7 +52,7 @@ def archive_list(main_url):
         if html_blob.find('a'):
             links.append(html_blob.find('a')['href'])
 
-    archives = [URL]
+    archives = []
 
     for link in links:
         if "archive" in link.lower() or 'feisile' in link.lower() or link.lower() == 'special.html':
@@ -124,6 +124,7 @@ def contents_list(page_soup):
     return contents
 
 def scrape_page(archive_url):
+    print(f'scraping {archive_url}')
     session = get_session()
 
     soup = BeautifulSoup(session.get(archive_url).content)
@@ -149,8 +150,8 @@ def scrape_page(archive_url):
     feather.write_feather(df, f'data/{archive_url[25:-5]}.feather')
 
 def all_pages(archives):
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        executor.map(scrape_page, archives)
+    for archive in archives:
+        scrape_page(archive)
 
 def combine_feathers():
     df = pd.DataFrame()
