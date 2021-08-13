@@ -78,11 +78,12 @@ def all_pages(archives):
         format2.scrape_page(archive)
     
     for i, archive in enumerate(archives):
-        if archive == 'http://www.whiskyfun.com/ArchiveMay04.html':
+        if archive == 'http://www.whiskyfun.com/ArchiveSeptember04.html':
             archives = archives.iloc[i:]
             break
         if archive == 'http://www.whiskyfun.com/special.html':
             feisile.scrape_page(archive)
+            continue
         format3.scrape_page(archive)  
     
     for archive in archives:
