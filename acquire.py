@@ -16,6 +16,7 @@ HEADERS = {'User-Agent': user}
 
 import format1
 import format2
+import format3
 
 HEADERS = {'User-Agent': user}
 
@@ -41,7 +42,7 @@ def archive_list(main_url):
 
     soup = BeautifulSoup(session.get(URL).content)
     
-    right_fonts = soup.find_all('font', color='#666666', size='2', face='Arial')
+    right_fonts = soup.find_all('font', color='#666666', face='Arial')
 
     links = []
 
@@ -68,8 +69,22 @@ def all_pages(archives):
             break
         format1.scrape_page(archive)
 
-    for archive in archives:
+    for i, archive in enumerate(archives):
+        if archive == 'http://www.whiskyfun.com/archivedecember09-1.html':
+            archives = archives.iloc[i:]
+            break
         format2.scrape_page(archive)
+    
+    for i, archive in enumerate(archives):
+        if archive == 'http://www.whiskyfun.com/ArchiveMay04.html':
+            archives = archives.iloc[i:]
+            break
+        format3.scrape_page(archive)  
+    
+    for archive in archives:
+        if archive == 'http://www.whiskyfun.com/ArchiveJan04.html':
+            break
+        format4.scrape_page(archive)
 
 def combine_feathers():
     df = pd.DataFrame()

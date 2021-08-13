@@ -13,17 +13,31 @@ import threading
 import re
 from acquire import HEADERS
 
-def is_title(soup_element):
-    if soup_element.name == 'span' and soup_element.get('class') == ['textenormalfoncegras'] and '(' in soup_element.text and '%' in soup_element.text:
-        return True
-    else:
-        return False
+def is_body(element):
+    c1 = element.name == 'font'
+    c2 = element.get('color') == '#666666'
+    c3 = element.get('size') == '2'
+    c4 = element.get('face') == 'Arial'
+    c5 = 'Colour: ' in element.text
 
-def is_date(soup_element):
-    if soup_element.name == 'font' and soup_element.get('color') == '#660000' and soup_element.get('size') == '3':
-        return True
+    return c1 and c2 and c3 and c4 and c5
+
+def rating(soup):
+    rating_soup = soup.find_next('strong').find_next('strong')
+    if rating_soup:
+        return rating_soup.text
     else:
-        return False
+        return None
+
+def data(soup):
+    body_soups = soup.find_all(lambda x: is_body(x))
+    data = []
+    for body_soup in body_soups:
+        data.append({'content': body_soup.text,
+                     'title': body_soup.find_next('font', color='#333333').text,
+                     'date': body_soup.find_previous('font', color='#660000', size='3').text,
+                     'rating': rating(body_soup)})
+    return data
 
 def angus_list(page_soup):
     angus_sections = page_soup.find_all('table', width='498')
@@ -43,26 +57,6 @@ def author_by_title(title, angus_list):
     else:
         return 'Serge'
 
-def rating(title_soup):
-    rating_soup = title_soup.find_next(class_='textenormalgras')
-    if rating_soup:
-        return rating_soup.text
-    else:
-        return None
-
-def data(soup):
-    title_soups = soup.find_all(lambda x: is_title(x))
-
-    data = []
-
-    for soup in title_soups:
-        data.append({'title': soup.text,
-                        'date': soup.find_previous(lambda x: is_date(x)).text,
-                        'rating': rating(soup),
-                        'content': soup.parent.text})
-    
-    return data
-    
 def scrape_page(archive_url):
     print(f'scraping {archive_url}')
     session = Session()
