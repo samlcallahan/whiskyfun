@@ -17,6 +17,8 @@ HEADERS = {'User-Agent': user}
 import format1
 import format2
 import format3
+import feisile
+import format4
 
 HEADERS = {'User-Agent': user}
 
@@ -79,6 +81,8 @@ def all_pages(archives):
         if archive == 'http://www.whiskyfun.com/ArchiveMay04.html':
             archives = archives.iloc[i:]
             break
+        if archive == 'http://www.whiskyfun.com/special.html':
+            feisile.scrape_page(archive)
         format3.scrape_page(archive)  
     
     for archive in archives:
