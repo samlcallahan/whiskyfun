@@ -39,4 +39,4 @@ def scrape_page(archive_url):
 
     page['author'] = 'Serge'
 
-    feather.write_feather(page, f'data/{archive_url[25:-5]}.feather')
+    feather.write_feather(page, f'data/{archive_url[25:-5]}.feather')   
