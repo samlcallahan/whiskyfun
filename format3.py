@@ -13,6 +13,8 @@ import threading
 import re
 from acquire import HEADERS
 
+# format 3 example website: http://www.whiskyfun.com/archiveseptember09-2.html
+
 def is_body(element):
     c1 = element.name == 'font'
     c2 = element.get('color') == '#666666'

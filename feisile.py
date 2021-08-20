@@ -13,6 +13,8 @@ import threading
 import re
 from acquire import HEADERS
 
+# feis ile website: http://www.whiskyfun.com/special.html
+
 def data(soup):
     content_soups = soup.find_all('font', size = '2', face = 'Verdana')
     content_soups = [x for x in content_soups if 'Colour:' in x.text]

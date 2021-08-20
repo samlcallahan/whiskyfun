@@ -13,6 +13,8 @@ import threading
 import re
 from acquire import HEADERS
 
+# format 1 example website: http://www.whiskyfun.com/archiveapril21-2-Aberlour-Benromach.html
+
 def is_date(soup_element):
     '''
     checks if a soup element is a date.
@@ -91,7 +93,8 @@ def angus_list(page_soup):
     # all of angus's sections are written in slightly narrower tables
     angus_sections = page_soup.find_all('table', width='498')
 
-    # 
+    # iterates though all of the sections that contain reviews by angus
+    # adds all the titles found in angus sections to the angus list
     angus = []
 
     for section in angus_sections:
@@ -102,7 +105,8 @@ def angus_list(page_soup):
 
 def author_by_title(title, angus_list):
     '''
-
+    checks if a title is in the angus_list
+    returns 'Angus' if it is and 'Serge' if it's not
     '''
     if title in angus_list:
         return 'Angus'
@@ -110,31 +114,29 @@ def author_by_title(title, angus_list):
     else:
         return 'Serge'
 
-def contents_list(page_soup):
-    '''
-
-    '''
-    content_soups = page_soup.find_all(class_='TextenormalNEW')
-
-    contents = [content.text for content in content_soups if 'Colour:' in content.text]
-
-    return contents
-
 def scrape_page(archive_url):
     '''
-
+    makes request to webpage, turns it into soup and passes to data function
+    then creates author column using angus_titles and author_by_title
+    finally writes to a feather to be used later
     '''
     print(f'scraping {archive_url}')
+
+    # creates requests session object and adds headers
     session = Session()
 
     session.headers.update(HEADERS)
 
+    # gets page content and soupifies it
     soup = BeautifulSoup(session.get(archive_url).content, 'html.parser')
 
+    # extracts the data from the soup and puts it in a dataframe
     page = pd.DataFrame(data(soup))
 
+    # finds which titles are written by angus and makes a corresponding author column
     angus_titles = angus_list(soup)
 
     page['author'] = page['title'].apply(lambda x: author_by_title(x, angus_titles))
 
+    # writes data to a feather file
     feather.write_feather(page, f'data/{archive_url[25:-5]}.feather')
