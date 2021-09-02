@@ -51,9 +51,18 @@ def is_archive(element):
 
     return c1 and c2 and c3 and c4
 
-def archive_list(main_url):
+def feather_to_url(feather_file):
+    '''
+    converts feather file to corresponding url name
+    '''
+    feather_file = URL + feather_file
+    site_url = feather_file[:-7] + 'html'
+    return site_url
+
+def archive_list(update):
     '''
     Gets a list of each archive page from the main site
+    if update only includes archive pages currently missing from data directory and the homepage
     '''
 
     # create session object and get all html pieces with the correct archive font style
@@ -63,7 +72,7 @@ def archive_list(main_url):
     session.headers.update(HEADERS)
 
     soup = BeautifulSoup(session.get(URL).content)
-    
+
     right_fonts = soup.find_all(lambda x: is_archive(x))
 
     # iterates through all those html chunks to pull out the links
@@ -84,6 +93,14 @@ def archive_list(main_url):
     # normalizes those links. for more info read make_full_link documentation
     archives = archives.apply(make_full_link)
 
+    archives = archives[:-2]
+
+    if update:
+        compare = pd.Series(os.listdir('data'))
+        compare = set(compare.apply(feather_to_url))
+        archives = set(archives)
+        archives = pd.Series(list(archives.difference(compare)))
+
     return archives
 
 def all_pages(archives):
@@ -98,6 +115,8 @@ def all_pages(archives):
             archives = archives.iloc[i:]
             break
         format1.scrape_page(archive)
+        if i == len(archives) - 1:
+            return
 
     # scrapes each archive page until it reaches the first page of format 3
     for i, archive in enumerate(archives):
@@ -105,6 +124,8 @@ def all_pages(archives):
             archives = archives.iloc[i:]
             break
         format2.scrape_page(archive)
+        if i == len(archives) - 1:
+            return
     
     # scrapes each archive page until it reaches the first page of format 4
     # the one oddly formatted feis ile page will use the feis ile scraper
@@ -115,13 +136,15 @@ def all_pages(archives):
         if archive == 'http://www.whiskyfun.com/special.html':
             feisile.scrape_page(archive)
             continue
-        format3.scrape_page(archive)  
+        format3.scrape_page(archive)
+        if i == len(archives) - 1:
+            return
     
     # scrapes the remaining archive pages
     for archive in archives:
-        if archive == 'http://www.whiskyfun.com/ArchiveJan04.html':
-            break
         format4.scrape_page(archive)
+        if i == len(archives) - 1:
+            return
 
 def combine_feathers():
     '''
@@ -135,16 +158,14 @@ def combine_feathers():
         df = df.append(to_append, ignore_index=True)
     return df
 
-def whisky_df():
+def whisky_df(update=True):
     '''
     Runs through the whole process - gets archive list,
     scrapes all the pages, combines the resulting feathers,
     stores it in a csv, and returns the resulting dataframe
     '''
-    archives = archive_list(URL)
+    archives = archive_list(update)
     all_pages(archives)
     whisky = combine_feathers()
     whisky.to_csv('whiskyfun.csv')
     return whisky
-
-# add update feature
