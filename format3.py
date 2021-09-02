@@ -20,9 +20,19 @@ def is_body(element):
     c2 = element.get('color') == '#666666'
     c3 = element.get('size') == '2'
     c4 = element.get('face') == 'Arial'
-    c5 = 'Colour: ' in element.text
+    c5 = ('Colour: ' in element.text) or ('Mouth:' in element.text)
 
     return c1 and c2 and c3 and c4 and c5
+
+def is_title(element):
+    c1 = element.name == 'font'
+    c2 = element.get('color') == '#333333'
+    if not element.contents:
+        return False
+    c3 = '(' in element.text
+    if element.get('size'):
+        return False
+    return c1 and c2 and c3
 
 def rating(soup):
     rating_soup = soup.find_next('strong').find_next('strong')

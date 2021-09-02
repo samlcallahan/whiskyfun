@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import sys
 import re
 import unicodedata
@@ -49,6 +50,16 @@ def basic_clean(string, lower=False):
     string = string.strip()
     return string
 
+def extract(text, pattern):
+    match = re.search(pattern, text)
+    if bool(match):
+        return match[1]
+    else:
+        return np.nan
+
+def extract_score(text):
+    score_pattern = re.compile(r'')
+
 def prep_whisky(df):
     '''
     sets date column to datetime type
@@ -60,5 +71,18 @@ def prep_whisky(df):
 
     for col in df.columns.drop('date'):
         df[col] = df[col].apply(basic_clean)
-
     
+    # drop fake trump glendro review, id 8244
+    df = df.drop(index=8244)
+
+    sgp_pattern = re.compile(r'[SGP|SPG].*(\d{3})')
+
+    df['SGP'] = df.content.apply(lambda x: extract(x, sgp_pattern))
+
+    df['SGP'] = df['SGP'].fillna(df.rating.apply(lambda x: extract(x, sgp_pattern)))
+
+    score_pattern = re.compile(r'(\d{1,3})\spoints')
+
+    df['score'] = df.content.apply(lambda x: extract(x, score_pattern))
+
+    df['score'] = df.score.fillna(df.rating.apply(lambda x: extract(x, score_pattern)))
